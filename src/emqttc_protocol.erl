@@ -24,6 +24,7 @@
 %%% @end
 %%%-----------------------------------------------------------------------------
 -module(emqttc_protocol).
+-compile({parse_transform, lager_transform}).
 
 -author("Feng Lee <feng@emqtt.io>").
 
@@ -64,7 +65,7 @@
         awaiting_ack  = #{}     :: map(),
         awaiting_rel  = #{}     :: map(),
         awaiting_comp = #{}     :: map(),
-        logger                  :: gen_logger:logmod()}).
+        logger                  :: []}).
 
 -type proto_state() :: #proto_state{}.
 
@@ -223,7 +224,7 @@ subscribe(Topics, State = #proto_state{packet_id = PacketId,
     Resubs = [Topic || {Name, _Qos} = Topic <- Topics, maps:is_key(Name, SubMap)], 
     case Resubs of
         [] -> ok;
-        _  -> Logger:warning("[~s] resubscribe ~p", [logtag(State), Resubs])
+        _  -> lager:warning("[~s] resubscribe ~p", [logtag(State), Resubs])
     end,
     SubMap1 = lists:foldl(fun({Name, Qos}, Acc) -> maps:put(Name, Qos, Acc) end, SubMap, Topics),
     %% send packet
@@ -233,7 +234,7 @@ subscribe(Topics, State = #proto_state{packet_id = PacketId,
 unsubscribe(Topics, State = #proto_state{subscriptions = SubMap, packet_id = PacketId, logger = Logger}) ->
     case Topics -- maps:keys(SubMap) of
         [] -> ok;
-        BadUnsubs -> Logger:warning("[~s] should not unsubscribe ~p", [logtag(State), BadUnsubs])
+        BadUnsubs -> lager:warning("[~s] should not unsubscribe ~p", [logtag(State), BadUnsubs])
     end,
     %% unsubscribe from topic tree
     SubMap1 = lists:foldl(fun(Topic, Acc) -> maps:remove(Topic, Acc) end, SubMap, Topics),
@@ -265,7 +266,7 @@ received({'PUBLISH', Packet = ?PUBLISH_PACKET(?QOS_2, _Topic, PacketId, _Payload
 received({'PUBACK', PacketId}, State = #proto_state{awaiting_ack = AwaitingAck, logger = Logger}) ->
     case maps:is_key(PacketId, AwaitingAck) of
         true -> ok;
-        false -> Logger:warning("[~s] PUBACK PacketId '~p' not found!", [logtag(State), PacketId])
+        false -> lager:warning("[~s] PUBACK PacketId '~p' not found!", [logtag(State), PacketId])
     end,
     {ok, State#proto_state{awaiting_ack = maps:remove(PacketId, AwaitingAck)}};
 
@@ -274,7 +275,7 @@ received({'PUBREC', PacketId}, State = #proto_state{awaiting_ack = AwaitingAck,
                                                     logger = Logger}) ->
     case maps:is_key(PacketId, AwaitingAck) of
         true -> ok;
-        false -> Logger:warning("[~s] PUBREC PacketId '~p' not found!", [logtag(State), PacketId])
+        false -> lager:warning("[~s] PUBREC PacketId '~p' not found!", [logtag(State), PacketId])
     end,
     pubrel(PacketId, State),
     {ok, State#proto_state{awaiting_ack   = maps:remove(PacketId, AwaitingAck), 
@@ -285,14 +286,14 @@ received({'PUBREL', PacketId}, State = #proto_state{awaiting_rel = AwaitingRel, 
         {ok, Publish} -> 
             {ok, Publish, State#proto_state{awaiting_rel = maps:remove(PacketId, AwaitingRel)}}; 
         error -> 
-            Logger:warning("[~s] PUBREL PacketId '~p' not found!", [logtag(State), PacketId]),
+            lager:warning("[~s] PUBREL PacketId '~p' not found!", [logtag(State), PacketId]),
             {ok, State}
     end;
 
 received({'PUBCOMP', PacketId}, State = #proto_state{awaiting_comp = AwaitingComp, logger = Logger}) ->
     case maps:is_key(PacketId, AwaitingComp) of
         true -> ok;
-        false -> Logger:warning("[~s] PUBREC PacketId '~p' not exist", [logtag(State), PacketId])
+        false -> lager:warning("[~s] PUBREC PacketId '~p' not exist", [logtag(State), PacketId])
     end,
     {ok, State#proto_state{ awaiting_comp  = maps:remove(PacketId, AwaitingComp)}};
 
@@ -317,9 +318,9 @@ received({'UNSUBACK', _PacketId}, State) ->
 %%------------------------------------------------------------------------------
 send(Packet, State = #proto_state{socket = Socket, logger = Logger}) ->
     LogTag = logtag(State),
-    Logger:debug("[~s] SENT: ~s", [LogTag, emqttc_packet:dump(Packet)]),
+    lager:debug("[~s] SENT: ~s", [LogTag, emqttc_packet:dump(Packet)]),
     Data = emqttc_serialiser:serialise(Packet),
-    Logger:debug("[~s] SENT: ~p", [LogTag, Data]),
+    lager:debug("[~s] SENT: ~p", [LogTag, Data]),
     emqttc_socket:send(Socket, Data),
     {ok, State}.
 
