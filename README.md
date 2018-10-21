@@ -1,4 +1,6 @@
-# Erlang MQTT Client [![Build Status](https://travis-ci.org/voxoz/emqttc.svg?branch=master)](https://travis-ci.org/voxoz/emqttc)
+# Erlang MQTT Client
+
+[![Build Status](https://travis-ci.org/voxoz/emqttc.svg?branch=master)](https://travis-ci.org/voxoz/emqttc)
 
 emqttc support MQTT V3.1/V3.1.1 Protocol Specification,
 and support parallel connections and auto reconnect to broker.
