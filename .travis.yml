@@ -1,12 +1,6 @@
 language: erlang
-
-sudo: false
-
 otp_release:
-   - 17.0
-   - 18.0
-   - 18.2.1
+   - 19.3
 
-script: 
-  - make
+script: "curl -fsSL https://raw.github.com/synrc/mad/master/mad > mad && chmod +x mad && ./mad dep com"
 
