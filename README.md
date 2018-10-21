@@ -1,8 +1,8 @@
-# Erlang MQTT Client [![Build Status](https://travis-ci.org/emqtt/emqttc.svg?branch=master)](https://travis-ci.org/emqtt/emqttc)
+# Erlang MQTT Client [![Build Status](https://travis-ci.org/voxoz/emqttc.svg?branch=master)](https://travis-ci.org/voxoz/emqttc)
 
-emqttc support MQTT V3.1/V3.1.1 Protocol Specification, and support parallel connections and auto reconnect to broker.
-
-emqttc requires Erlang R17+.
+emqttc support MQTT V3.1/V3.1.1 Protocol Specification,
+and support parallel connections and auto reconnect to broker.
+This version of emqttc requires Erlang R20.
 
 ## Features
 
@@ -323,10 +323,6 @@ emqttc:disconnect(Client).
 emqttc:topics(Client).
 ```
 
-## Design 
-
-![Design](https://raw.githubusercontent.com/emqtt/emqttc/master/doc/Socket.png)
-
 ## License
 
 The MIT License (MIT)
@@ -336,7 +332,14 @@ The MIT License (MIT)
 [@hiroeorz](https://github.com/hiroeorz)
 [@desoulter](https://github.com/desoulter)
 [@witeman](https://github.com/witeman)
+[@5HT](https://github.com/5HT)
 
-## Contact
+## Author
 
 feng@emqtt.io
+
+## Maintainer
+
+maxim@synrc.com
+
+
